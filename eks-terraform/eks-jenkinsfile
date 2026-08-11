@@ -9,10 +9,17 @@ pipeline {
         )
     }
 
+    // Global Environment Variables (प्रत्येक स्टेजमध्ये वेगळे लिहायची गरज नाही)
+    environment {
+        AWS_DEFAULT_REGION = 'ap-south-1'
+        AWS_REGION         = 'ap-south-1'
+    }
+
     stages {
         stage('Checkout from Git') {
             steps {
                 echo 'Checking out Git repository...'
+                checkout scm  // GitHub वरून कोड Checkout करण्यासाठी
             }
         }
 
@@ -37,79 +44,58 @@ pipeline {
                             exit 1
                         fi
                     fi
-                    terraform --version
                 '''
             }
         }
 
-        stage('Terraform version') {
+        stage('Terraform Version') {
             steps {
                 sh 'terraform --version'
             }
         }
 
-        stage('Terraform init') {
+        stage('Terraform Init') {
             steps {
                 dir('eks-terraform') {
-                    sh '''
-                        export AWS_DEFAULT_REGION=ap-south-1
-                        export AWS_REGION=ap-south-1
-                        terraform init --reconfigure
-                    '''
+                    sh 'terraform init --reconfigure'
                 }
             }
         }
 
-        stage('Terraform validate') {
+        stage('Terraform Validate') {
             steps {
                 dir('eks-terraform') {
-                    sh '''
-                        export AWS_DEFAULT_REGION=ap-south-1
-                        export AWS_REGION=ap-south-1
-                        terraform validate
-                    '''
+                    sh 'terraform validate'
                 }
             }
         }
 
-        stage('Terraform plan') {
+        stage('Terraform Plan') {
             steps {
                 dir('eks-terraform') {
-                    sh '''
-                        export AWS_DEFAULT_REGION=ap-south-1
-                        export AWS_REGION=ap-south-1
-                        terraform plan
-                    '''
+                    sh 'terraform plan'
                 }
             }
         }
 
-        stage('Terraform apply') {
+        stage('Terraform Apply') {
             when {
                 expression { params.ACTION == 'apply' }
             }
             steps {
                 dir('eks-terraform') {
-                    sh '''
-                        export AWS_DEFAULT_REGION=ap-south-1
-                        export AWS_REGION=ap-south-1
-                        terraform apply -auto-approve
-                    '''
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
 
-        stage('Terraform destroy') {
+        stage('Terraform Destroy') {
             when {
                 expression { params.ACTION == 'destroy' }
             }
             steps {
                 dir('eks-terraform') {
-                    sh '''
-                        export AWS_DEFAULT_REGION=ap-south-1
-                        export AWS_REGION=ap-south-1
-                        terraform destroy -auto-approve
-                    '''
+                    sh 'terraform destroy -auto-approve'
                 }
             }
         }
