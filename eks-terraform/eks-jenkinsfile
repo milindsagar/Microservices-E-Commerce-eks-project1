@@ -9,7 +9,6 @@ pipeline {
         )
     }
 
-    // Global Environment Variables (प्रत्येक स्टेजमध्ये वेगळे लिहायची गरज नाही)
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
         AWS_REGION         = 'ap-south-1'
@@ -19,7 +18,7 @@ pipeline {
         stage('Checkout from Git') {
             steps {
                 echo 'Checking out Git repository...'
-                checkout scm  // GitHub वरून कोड Checkout करण्यासाठी
+                git branch: 'master', url: 'https://github.com/milindsagar/Microservices-E-Commerce-eks-project1.git'
             }
         }
 
