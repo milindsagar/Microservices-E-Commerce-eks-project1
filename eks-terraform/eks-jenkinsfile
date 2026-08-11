@@ -12,6 +12,7 @@ pipeline {
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
         AWS_REGION         = 'ap-south-1'
+        TF_PLUGIN_CACHE_DIR = "${WORKSPACE}/.terraform.d/plugin-cache"
     }
 
     stages {
@@ -19,6 +20,20 @@ pipeline {
             steps {
                 echo 'Checking out Git repository...'
                 git branch: 'master', url: 'https://github.com/milindsagar/Microservices-E-Commerce-eks-project1.git'
+            }
+        }
+        stage('Parallel Checks') {
+            parallel {
+                stage('Lint Check') {
+                    steps {
+                        sh 'tflint'
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        sh 'tfsec .'
+                    }
+                }
             }
         }
 
