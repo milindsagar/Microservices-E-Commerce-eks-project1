@@ -10,8 +10,8 @@ pipeline {
     }
 
     environment {
-        AWS_DEFAULT_REGION = 'ap-south-1'
-        AWS_REGION         = 'ap-south-1'
+        AWS_DEFAULT_REGION  = 'ap-south-1'
+        AWS_REGION          = 'ap-south-1'
         TF_PLUGIN_CACHE_DIR = "${WORKSPACE}/.terraform.d/plugin-cache"
     }
 
@@ -62,21 +62,26 @@ pipeline {
             }
         }
 
-        // Parallel Checks इथे ठेवले आहेत (Init नंतर आणि Plan आधी)
+        // ============ CORRECTED PARALLEL CHECKS ============
         stage('Parallel Checks') {
-            steps {
-                dir('eks-terraform') {
-                    parallel(
-                        'Lint Check': {
+            parallel {
+                stage('Lint Check') {
+                    steps {
+                        dir('eks-terraform') {
                             sh 'tflint || echo "tflint not found or passed with warnings"'
-                        },
-                        'Security Scan': {
+                        }
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        dir('eks-terraform') {
                             sh 'tfsec . || echo "tfsec not found or passed with warnings"'
                         }
-                    )
+                    }
                 }
             }
         }
+        // ====================================================
 
         stage('Terraform Validate') {
             steps {
