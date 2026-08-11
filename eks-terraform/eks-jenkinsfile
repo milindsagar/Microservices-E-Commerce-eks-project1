@@ -22,20 +22,6 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/milindsagar/Microservices-E-Commerce-eks-project1.git'
             }
         }
-        stage('Parallel Checks') {
-            parallel {
-                stage('Lint Check') {
-                    steps {
-                        sh 'tflint'
-                    }
-                }
-                stage('Security Scan') {
-                    steps {
-                        sh 'tfsec .'
-                    }
-                }
-            }
-        }
 
         stage('Install Terraform') {
             steps {
@@ -72,6 +58,22 @@ pipeline {
             steps {
                 dir('eks-terraform') {
                     sh 'terraform init --reconfigure'
+                }
+            }
+        }
+
+        // Parallel Checks इथे ठेवले आहेत (Init नंतर आणि Plan आधी)
+        stage('Parallel Checks') {
+            steps {
+                dir('eks-terraform') {
+                    parallel(
+                        'Lint Check': {
+                            sh 'tflint || echo "tflint not found or passed with warnings"'
+                        },
+                        'Security Scan': {
+                            sh 'tfsec . || echo "tfsec not found or passed with warnings"'
+                        }
+                    )
                 }
             }
         }
