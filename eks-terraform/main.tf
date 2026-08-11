@@ -134,14 +134,6 @@ data "aws_subnet" "subnet-2" {
   }
 }
 
-data "aws_security_group" "selected" {
-  vpc_id = data.aws_vpc.main.id
-  filter {
-    name   = "tag:Name"
-    values = ["Jumphost-sg"]
-  }
-}
-
 # ----------------------------
 # EKS Cluster
 # ----------------------------
@@ -150,8 +142,8 @@ resource "aws_eks_cluster" "eks" {
   role_arn = aws_iam_role.master.arn
 
   vpc_config {
-    subnet_ids         = [data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id]
-    security_group_ids = [data.aws_security_group.selected.id]
+    subnet_ids = [data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id]
+    # security_group_ids काढून टाकले आहे जेणेकरून EKS डीफॉल्ट SG तयार करेल
   }
 
   tags = {
@@ -172,12 +164,12 @@ resource "aws_eks_cluster" "eks" {
 # ----------------------------
 resource "aws_eks_node_group" "node-grp" {
   cluster_name    = aws_eks_cluster.eks.name
-  node_group_name = "project-node-group-v3" # नवीन नाव दिले आहे
+  node_group_name = "project-node-group-v3"
   node_role_arn   = aws_iam_role.worker.arn
   subnet_ids      = [data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id]
   capacity_type   = "ON_DEMAND"
   disk_size       = 20
-  instance_types  = ["t3.medium"] # t3.large ऐवजी t3.medium केले आहे
+  instance_types  = ["t3.medium"]
 
   labels = {
     env = "dev"
@@ -188,13 +180,19 @@ resource "aws_eks_node_group" "node-grp" {
   }
 
   scaling_config {
-    desired_size = 2 # कोटा एरर टाळण्यासाठी नोड्स २ ठेवले आहेत
+    desired_size = 2
     max_size     = 5
     min_size     = 1
   }
 
   update_config {
     max_unavailable = 1
+  }
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+    delete = "20m"
   }
 
   depends_on = [
