@@ -172,12 +172,12 @@ resource "aws_eks_cluster" "eks" {
 # ----------------------------
 resource "aws_eks_node_group" "node-grp" {
   cluster_name    = aws_eks_cluster.eks.name
-  node_group_name = "project-node-group-v2" # Changed to avoid collision with existing AWS resource
+  node_group_name = "project-node-group-v3" # नवीन नाव दिले आहे
   node_role_arn   = aws_iam_role.worker.arn
   subnet_ids      = [data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id]
   capacity_type   = "ON_DEMAND"
   disk_size       = 20
-  instance_types  = ["t3.large"]
+  instance_types  = ["t3.medium"] # t3.large ऐवजी t3.medium केले आहे
 
   labels = {
     env = "dev"
@@ -188,9 +188,9 @@ resource "aws_eks_node_group" "node-grp" {
   }
 
   scaling_config {
-    desired_size = 3
-    max_size     = 10
-    min_size     = 2
+    desired_size = 2 # कोटा एरर टाळण्यासाठी नोड्स २ ठेवले आहेत
+    max_size     = 5
+    min_size     = 1
   }
 
   update_config {
