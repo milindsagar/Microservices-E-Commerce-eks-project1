@@ -51,7 +51,11 @@ pipeline {
         stage('Terraform init') {
             steps {
                 dir('eks-terraform') {
-                    sh 'terraform init --reconfigure'
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+                        export AWS_REGION=ap-south-1
+                        terraform init --reconfigure
+                    '''
                 }
             }
         }
@@ -59,7 +63,11 @@ pipeline {
         stage('Terraform validate') {
             steps {
                 dir('eks-terraform') {
-                    sh 'terraform validate'
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+                        export AWS_REGION=ap-south-1
+                        terraform validate
+                    '''
                 }
             }
         }
@@ -67,7 +75,11 @@ pipeline {
         stage('Terraform plan') {
             steps {
                 dir('eks-terraform') {
-                    sh 'terraform plan'
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+                        export AWS_REGION=ap-south-1
+                        terraform plan
+                    '''
                 }
             }
         }
@@ -78,7 +90,11 @@ pipeline {
             }
             steps {
                 dir('eks-terraform') {
-                    sh 'terraform apply -auto-approve'
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+                        export AWS_REGION=ap-south-1
+                        terraform apply -auto-approve
+                    '''
                 }
             }
         }
@@ -89,7 +105,11 @@ pipeline {
             }
             steps {
                 dir('eks-terraform') {
-                    sh 'terraform destroy -auto-approve'
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+                        export AWS_REGION=ap-south-1
+                        terraform destroy -auto-approve
+                    '''
                 }
             }
         }
